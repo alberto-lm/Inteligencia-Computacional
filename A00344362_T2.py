@@ -8,7 +8,7 @@ class RecSim(object):
         self.alpha = 0.9 if alpha == -1 else alpha
         self.beta = 1.5 if beta == -1 else beta
         self.N = len(self.coords)
-        self.M = 50 if M == -1 else M
+        self.M = 150 if M == -1 else M
         self.R = 0.95 if R == -1 else R
         self.stopping_iteration = 1000 if stopping_iteration == -1 else stopping_iteration
         self.iteration = 1
@@ -62,7 +62,7 @@ class RecSim(object):
             elif np.random.uniform() < self.p_accept(candidate_distance):
                 accepted += 1
                 self.current_distance, self.current_solution = candidate_distance, candidate
-            local_distances_list.append(self.current_distance)
+            local_distances_list.append(self.shortest_distance)
         return accepted/self.M, local_distances_list
 
     def init_temp(self):
@@ -71,7 +71,7 @@ class RecSim(object):
         while r < self.R:
             r, _ = self.cadena_markov()
             self.T *= self.beta
-        print(self.T)
+        print(f'temp = {self.T}')
         return self.T
     
     def recocido(self):
@@ -81,6 +81,7 @@ class RecSim(object):
             self.distances_list.append(local_distances_list)
             self.T *= self.alpha
             self.iteration += 1
+        print(f'distance = {self.shortest_distance}')
 
     def plot_learning(self):
         evaluaciones = np.asarray(self.distances_list)
@@ -115,7 +116,7 @@ class RecSim(object):
             
 
 if __name__ == "__main__":
-    rs = RecSim(stopping_iteration=100)
+    rs = RecSim(stopping_iteration=80)
     rs.recocido()
     rs.plot_learning()
     rs.plot_paths()
