@@ -13,7 +13,7 @@ class Particula:
 
     def next_state(self, g):
         self.v = self.get_next_v(g)
-        self.x += self.v
+        self.x = self.x + self.v
 
     def get_next_v(self, g):
         ep_1 = np.random.uniform(0, 1, size=3)
@@ -31,6 +31,7 @@ class PSO:
         self.n = 10 if n == -1 else n
         self.particulas = [Particula() for i in range(self.n)]          
         self.g = self.get_best_local()
+        self.g_list = []
         self.max_iterations = 100 if max_iterations == -1 else max_iterations
         self.iteration = 0
 
@@ -52,8 +53,7 @@ class PSO:
                 err += (y - self.lut[x])**2
             except:
                 return math.inf
-        err /= len(self.lut)
-        return err
+        return err / len(self.lut)
 
     def evaluate(self, particula, x):
         a_1, a_2, a_3 = particula
@@ -71,9 +71,17 @@ class PSO:
                 if err_x < err_l:
                     p.l = p.x
             self.g = self.get_best_local()
+            self.g_list.append(self.calc_error(self.g))
             self.iteration += 1
-        print(self.calc_error(self.g))
+        print(f'error = {self.calc_error(self.g)}')
         return self.g
+
+    def plot_g(self):
+        err = np.asarray(self.g_list)
+        plt.plot(err, color='g')
+        plt.ylabel("Error")
+        plt.xlabel("Iteration")
+        plt.show()
 
 if __name__ == "__main__":
     values = {
@@ -89,5 +97,7 @@ if __name__ == "__main__":
         9: 323
     }
     np.seterr('raise')
-    pso = PSO(lut=values, n=100, max_iterations=1000)
-    print(pso.calc_coefficients())
+    pso = PSO(lut=values, n=100, max_iterations=50)
+    coefficients = pso.calc_coefficients()
+    print(coefficients)
+    pso.plot_g()
